@@ -45,6 +45,24 @@
         #product-image { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
         .fabricks-link { position: absolute; left: 42%; transform: translateX(-50%); z-index: 20; top: -0.25%; }
         .fabricks-link img { width: 160px; height: auto; border: none; }
+        /* ここから追加：数字のデザイン */
+        .overlay-number {
+            position: absolute;
+            top: 50px;         /* 上からの位置（自分で調整） */
+            left: 50px;        /* 左からの位置（自分で調整） */
+            z-index: 100;      /* 一番手前に配置 */
+            pointer-events: none; /* 下の画像のドラッグを邪魔しない */
+            
+            font-family: Arial, sans-serif;
+            font-size: 150px;
+            font-weight: 100;
+            line-height: 1;
+            
+            /* 外線フチ取りコマンド */
+            color: transparent;
+            -webkit-text-stroke: 1.5px #ffffff;
+            opacity: 0.8;
+        }
     </style>
     /* ここから追加 */
         .overlay-number {
@@ -68,6 +86,10 @@
     <div class="scrolling-wrapper">
         <div id="viewer-container">
             <img id="product-image" src="image_01.jpg">
+            <div id="viewer-container">
+            <img id="product-image" src="image_01.jpg">
+            <div class="overlay-number">2</div>
+        </div>
         </div>
         <div class="fabricks-link">
             <a href="https://fabricks.com/" target="_blank">
