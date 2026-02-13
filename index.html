@@ -25,27 +25,22 @@
     max-width: 2000px;
     height: auto;
     max-height: 80vh;
+    aspect-ratio: auto;
+    touch-action: pan-y;
+    cursor: ew-resize;
     z-index: 10;
-    
-    /* ★Fabricks風の切り抜き（左下をカット） */
-    clip-path: polygon(
-        0% 0%,       /* 左上 */
-        100% 0%,     /* 右上 */
-        100% 100%,   /* 右下 */
-        25% 100%,    /* 左下の切り欠き開始点（数字を大きくするとカットが深くなります） */
-        0% 85%       /* 左側の切り欠き終了点 */
-    );
 
-    /* ★薄い水色の枠線（内側に線を引く手法） */
-    outline: 2px solid #AEEFFF;
-    outline-offset: -2px;
-    
-    background-color: rgba(174, 239, 255, 0.1);
+    /* ★水色の線を薄く変更 */
+    border: 2px solid #94F6FC ; /* 透明感のある薄い水色に変更 */
+    border-radius: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+
     display: flex;
     justify-content: center;
     align-items: center;
-    touch-action: pan-y;
-    cursor: ew-resize;
+    /* ★枠内の背景もごく薄い水色に（不要なら削除してください） */
+    background-color: rgb(148, 246, 252); 
 }
         #product-image { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
         .fabricks-link { position: absolute; left: 42%; transform: translateX(-50%); z-index: 20; top: -0.25%; }
