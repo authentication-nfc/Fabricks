@@ -5,103 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Fixed Viewer</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; background-color: #000; overflow-x: hidden; }
+        /* 基本リセット */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { width: 100%; background-color: #000; overflow-x: hidden; line-height: 0; }
+
         .scrolling-wrapper {
             position: relative;
             width: 100%;
             max-width: 1500px;
             margin: 0 auto;
-            height: 733.33vw; /* 1500x11000比率 */
+            height: 733.33vw;
             background: url('long-background.jpg') no-repeat top center;
             background-size: 100% auto;
         }
-       /* 1. 外側の枠線の設定 */
-#viewer-container {
-    position: absolute;
-    top: 19%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 2000px;
-    height: auto;
-    max-height: 80vh;
-    aspect-ratio: auto;
-    touch-action: pan-y;
-    cursor: ew-resize;
-    z-index: 10;
 
-    /* ★水色の線を薄く変更 */
-    border: 2px solid #94F6FC ; /* 透明感のある薄い水色に変更 */
-    border-radius: 20px;
-    box-sizing: border-box;
-    overflow: hidden;
+        #viewer-container {
+            position: absolute;
+            top: 19%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 2000px;
+            height: auto;
+            max-height: 80vh;
+            touch-action: pan-y;
+            cursor: ew-resize;
+            z-index: 10;
+            border: 2px solid #94F6FC;
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgb(148, 246, 252); 
+        }
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* ★枠内の背景もごく薄い水色に（不要なら削除してください） */
-    background-color: rgb(148, 246, 252); 
-}
         #product-image { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-        .fabricks-link { position: absolute; left: 42%; transform: translateX(-50%); z-index: 20; top: -0.25%; }
-        .fabricks-link img { width: 160px; height: auto; border: none; }
-        /* ここから追加：数字のデザイン */
+
+        /* 数字のデザイン */
         .overlay-number {
             position: absolute;
-            top: 20px;         /* 上からの位置（自分で調整） */
-            left: 17px;        /* 左からの位置（自分で調整） */
-            z-index: 100;      /* 一番手前に配置 */
-            pointer-events: none; /* 下の画像のドラッグを邪魔しない */
-            
-            font-family: Arial, sans-serif;
-            font-size: 70px;
-            font-weight: 100;
+            top: 5%;
+            left: 5%;
+            z-index: 100;
+            pointer-events: none;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 80px;
             line-height: 1;
-            
-            /* 外線フチ取りコマンド */
             color: transparent;
-            -webkit-text-stroke: 1.5px #ffffff;
+            -webkit-text-stroke: 2px #ffffff;
             opacity: 0.8;
-            
-            /* 追加：重ねる画像のデザイン */
+        }
+
+        /* 重ねる画像のデザイン */
         .overlay-image-layer {
             position: absolute;
-            top: 50px;         /* 上からの位置（数字と被らないように調整） */
-            right: 50px;       /* 右からの位置 */
-            width: 20px;      /* 画像の横幅（お好みで調整） */
+            top: 5%;           /* 位置を数字と合わせるか調整してください */
+            right: 5%;         /* 右側に配置 */
+            width: 80px;       /* 消えないように少し大きめに設定しました */
             height: auto;
-            z-index: 100;      /* 一番手前に配置 */
-            pointer-events: none; /* 下の画像のドラッグを邪魔しない */
-            opacity: 0.8;      /* 少し透けさせる（不要なら削除） */
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0.8;
         }
-        }/* 余白をリセットするコマンド */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
-body {
-    line-height: 0; /* 画像の下などにできる隙間も消す */
-}
+        .fabricks-link { position: absolute; left: 42%; transform: translateX(-50%); z-index: 20; top: -0.25%; }
+        .fabricks-link img { width: 160px; height: auto; border: none; }
     </style>
-    /* ここから追加 */
-        .overlay-number {
-            position: absolute;
-            top: 5%;           /* 上からの位置（お好みで調整） */
-            left: 5%;          /* 左からの位置（お好みで調整） */
-            z-index: 25;       /* 他の要素より一番上にくるように設定 */
-            pointer-events: none; /* 下の画像を触れるようにする */
-
-            font-family: 'Arial Black', sans-serif; /* 太めのフォント */
-            font-size: 100px;  /* 数字の大きさ */
-            line-height: 1;
-            
-            /* 中を透明にして外枠だけにする */
-            color: transparent;
-            -webkit-text-stroke: 2px #ffffff; /* 白色のフチ。太さは2px */
-        }
-        /* ここまで追加 */
 </head>
 <body>
     <div class="scrolling-wrapper">
