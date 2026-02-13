@@ -3,26 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Fabricks Style - 360 Viewer</title>
+    <title>Fabricks Style - Final</title>
     <style>
-        /* リンク画像の共通設定 */
-.link-image-container {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 20; /* 回転画像(10)より手前に出す */
-}
-
-.link-image-container img {
-    width: 250px; /* ★ボタン画像のサイズ（お好みで変えてください） */
-    height: auto;
-    cursor: pointer;
-}
-
-/* 配置場所の高さ指定 */
-.pos-link-bottom {
-    top: 85%; /* ★背景の上から85%の位置（場所を変えたいときはここを調整） */
-}
         body, html { 
             margin: 0; 
             padding: 0; 
@@ -31,7 +13,7 @@
             overflow-x: hidden; 
         }
 
-        /* 1500x11000の背景比率 */
+        /* 1. 背景画像の設定（1500x11000） */
         .scrolling-wrapper {
             position: relative;
             width: 100%;
@@ -42,15 +24,15 @@
             background-size: 100% auto;
         }
 
+        /* 2. 360度ビューアの設定 */
         #viewer-container {
             position: absolute;
-            top: 17%; 
+            top: 17%; /* ★ご要望通り 17% に変更しました */
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 95%; 
-            max-width: 1450px; 
+            width: 90%; 
+            max-width: 1400px; 
             aspect-ratio: 1 / 1;
-            /* touch-action: pan-y でブラウザに上下スクロールを許可しつつ、左右をJSで取る */
             touch-action: pan-y; 
             cursor: ew-resize;
             z-index: 10;
@@ -63,16 +45,44 @@
             pointer-events: none;
             filter: drop-shadow(0 15px 35px rgba(0,0,0,0.3));
         }
+
+        /* 3. 透過PNGリンクボタンの設定 */
+        .fabricks-link {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            line-height: 0;
+        }
+
+        .fabricks-link img {
+            width: 300px;  /* ★ボタンの大きさ */
+            height: auto;
+            border: none;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .pos-fabricks {
+            /* 回転画像(17%)のすぐ下に置く場合は、25%〜30%くらいが目安です */
+            top: 25%; 
+        }
+
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
     </style>
 </head>
 <body>
 
     <div class="scrolling-wrapper">
         <div id="viewer-container">
-            <div class="link-image-container pos-link-bottom">
-    <a href="https://www.google.com" target="_blank"> <img src="button.png" alt="リンクボタン"> </a>
-</div>
             <img id="product-image" src="image_01.jpg">
+        </div>
+
+        <div class="fabricks-link pos-fabricks">
+            <a href="https://fabricks.com/" target="_blank">
+                <img src="your-file-name.png" alt=""> </a>
         </div>
     </div>
 
@@ -100,7 +110,6 @@
             if (relativePos < -8) { relativePos = -8; velocity = 0; } 
             if (relativePos > 9) { relativePos = 9; velocity = 0; }
             let finalFrame = relativePos >= 0 ? relativePos : 18 + relativePos;
-
             if (finalFrame !== currentFrameIndex) {
                 imgElement.src = images[finalFrame];
                 currentFrameIndex = finalFrame;
@@ -144,40 +153,4 @@
             updateFrame(frameOffset);
         };
 
-        const container = document.getElementById('viewer-container');
-
-        // マウス操作
-        container.addEventListener('mousedown', (e) => startAction(e.pageX));
-        window.addEventListener('mousemove', (e) => {
-            if (isDragging) moveAction(e.pageX);
-        });
-        window.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                lastFrameIndex = currentFrameIndex;
-                animateInertia();
-            }
-        });
-
-        // タッチ操作（スクロールを殺さない設定）
-        container.addEventListener('touchstart', (e) => {
-            startAction(e.touches[0].pageX);
-        }, { passive: true });
-
-        container.addEventListener('touchmove', (e) => {
-            if (isDragging) {
-                moveAction(e.touches[0].pageX);
-            }
-        }, { passive: true });
-
-        container.addEventListener('touchend', () => {
-            if (isDragging) {
-                isDragging = false;
-                lastFrameIndex = currentFrameIndex;
-                animateInertia();
-            }
-        });
-    </script>
-</body>
-</html>
-                    let nextRelative = (current
+        const container =
