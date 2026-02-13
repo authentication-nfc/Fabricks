@@ -13,29 +13,26 @@
             overflow-x: hidden; 
         }
 
-        /* 1. 背景画像の設定（1500x11000の比率） */
+        /* 1500x11000の背景比率 */
         .scrolling-wrapper {
             position: relative;
             width: 100%;
             max-width: 1500px;
             margin: 0 auto;    
-            /* 11000 / 1500 * 100 = 733.33 */
             height: 733.33vw;  
             background: url('long-background.jpg') no-repeat top center;
             background-size: 100% auto;
         }
 
-        /* 2. 360度ビューアの設定 */
         #viewer-container {
             position: absolute;
-            top: 38%; /* 配置場所（必要に応じて数値を調整） */
+            top: 26%; 
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%; 
             max-width: 1400px; 
             aspect-ratio: 1 / 1;
-            
-            /* ★重要：上下スクロールを許可し、左右の回転も検知する設定 */
+            /* touch-action: pan-y でブラウザに上下スクロールを許可しつつ、左右をJSで取る */
             touch-action: pan-y; 
             cursor: ew-resize;
             z-index: 10;
@@ -63,7 +60,6 @@
         const totalFrames = 18;
         const images = [];
 
-        // 画像のプリロード
         for (let i = 1; i <= totalFrames; i++) {
             const num = i.toString().padStart(2, '0');
             images.push(`image_${num}.jpg`);
@@ -78,14 +74,10 @@
         let velocity = 0; 
         let rafId = null;
 
-        // 回転の更新処理（180度制限付き）
         const updateFrame = (offset) => {
             let relativePos = offset + (lastFrameIndex <= 9 ? lastFrameIndex : lastFrameIndex - 18);
-            
-            // 10番と11番で止まる制限
             if (relativePos < -8) { relativePos = -8; velocity = 0; } 
             if (relativePos > 9) { relativePos = 9; velocity = 0; }
-
             let finalFrame = relativePos >= 0 ? relativePos : 18 + relativePos;
 
             if (finalFrame !== currentFrameIndex) {
@@ -94,9 +86,77 @@
             }
         };
 
-        // 慣性アニメーション
         const animateInertia = () => {
             if (!isDragging) {
-                velocity *= 0.92; // 摩擦
+                velocity *= 0.92;
                 if (Math.abs(velocity) > 0.1) {
+                    let nextRelative = (currentFrameIndex <= 9 ? currentFrameIndex : currentFrameIndex - 18) + (velocity / 15);
+                    if (nextRelative < -8) nextRelative = -8;
+                    if (nextRelative > 9) nextRelative = 9;
+                    let nextFrame = Math.round(nextRelative >= 0 ? nextRelative : 18 + nextRelative);
+                    if (nextFrame !== currentFrameIndex) {
+                        imgElement.src = images[nextFrame];
+                        currentFrameIndex = nextFrame;
+                    }
+                    rafId = requestAnimationFrame(animateInertia);
+                } else {
+                    lastFrameIndex = currentFrameIndex;
+                }
+            }
+        };
+
+        const startAction = (x) => {
+            isDragging = true;
+            startX = x;
+            lastX = x;
+            lastFrameIndex = currentFrameIndex;
+            velocity = 0;
+            cancelAnimationFrame(rafId);
+        };
+
+        const moveAction = (x) => {
+            if (!isDragging) return;
+            velocity = x - lastX;
+            lastX = x;
+            const sensitivity = 15;
+            const frameOffset = Math.floor((x - startX) / sensitivity);
+            updateFrame(frameOffset);
+        };
+
+        const container = document.getElementById('viewer-container');
+
+        // マウス操作
+        container.addEventListener('mousedown', (e) => startAction(e.pageX));
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) moveAction(e.pageX);
+        });
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                lastFrameIndex = currentFrameIndex;
+                animateInertia();
+            }
+        });
+
+        // タッチ操作（スクロールを殺さない設定）
+        container.addEventListener('touchstart', (e) => {
+            startAction(e.touches[0].pageX);
+        }, { passive: true });
+
+        container.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                moveAction(e.touches[0].pageX);
+            }
+        }, { passive: true });
+
+        container.addEventListener('touchend', () => {
+            if (isDragging) {
+                isDragging = false;
+                lastFrameIndex = currentFrameIndex;
+                animateInertia();
+            }
+        });
+    </script>
+</body>
+</html>
                     let nextRelative = (current
