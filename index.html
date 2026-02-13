@@ -62,7 +62,16 @@
             color: transparent;
             -webkit-text-stroke: 1.5px #ffffff;
             opacity: 0.8;
-        }
+        }/* 余白をリセットするコマンド */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    line-height: 0; /* 画像の下などにできる隙間も消す */
+}
     </style>
     /* ここから追加 */
         .overlay-number {
