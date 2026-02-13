@@ -15,19 +15,32 @@
             background: url('long-background.jpg') no-repeat top center;
             background-size: 100% auto;
         }
-        #viewer-container {
-            position: absolute;
-            top: 19%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 2000px;
-            height: auto;
-    max-height: 80vh; /* これで縦に伸びすぎるのを防ぎます */
-            aspect-ratio: auto;
-            touch-action: pan-y;
-            cursor: ew-resize;
-            z-index: 10;
+       /* 1. 外側の枠線の設定 */
+#viewer-container {
+    position: absolute;
+    top: 19%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 2000px;
+    height: auto;
+    max-height: 80vh;
+    aspect-ratio: auto;
+    touch-action: pan-y;
+    cursor: ew-resize;
+    z-index: 10;
+
+    /* ★水色の線を薄く変更 */
+    border: 2px solid #AEEFFF; /* 透明感のある薄い水色に変更 */
+    border-radius: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* ★枠内の背景もごく薄い水色に（不要なら削除してください） */
+    background-color: rgba(174, 239, 255, 0.1);
         }
         #product-image { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
         .fabricks-link { position: absolute; left: 42%; transform: translateX(-50%); z-index: 20; top: -0.25%; }
