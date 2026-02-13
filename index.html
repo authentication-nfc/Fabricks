@@ -3,110 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Fabricks Style - Fix</title>
+    <title>Fixed Viewer</title>
     <style>
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            background-color: #000; 
-            overflow-x: hidden; 
-        }
-
-        /* 1. 背景画像の設定（1500x11000） */
+        body, html { margin: 0; padding: 0; width: 100%; background-color: #000; overflow-x: hidden; }
         .scrolling-wrapper {
             position: relative;
             width: 100%;
             max-width: 1500px;
-            margin: 0 auto;    
-            height: 733.33vw;  
+            margin: 0 auto;
+            height: 733.33vw; /* 1500x11000比率 */
             background: url('long-background.jpg') no-repeat top center;
             background-size: 100% auto;
         }
-
-        /* 2. 360度ビューアの設定 */
         #viewer-container {
             position: absolute;
-            top: 17%; /* 回転画像の位置を17%に設定 */
+            top: 17%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%; 
-            max-width: 1400px; 
+            width: 90%;
+            max-width: 1400px;
             aspect-ratio: 1 / 1;
-            touch-action: pan-y; 
+            touch-action: pan-y;
             cursor: ew-resize;
             z-index: 10;
         }
-
-        #product-image {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            pointer-events: none;
-            filter: drop-shadow(0 15px 35px rgba(0,0,0,0.3));
-        }
-
-        /* 3. 透過PNGリンクボタンの設定 */
-        .fabricks-link {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-            line-height: 0;
-        }
-
-        .fabricks-link img {
-            width: 300px; 
-            height: auto;
-            border: none;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .pos-fabricks {
-            top: 25%; /* ボタンの位置（回転画像の下付近） */
-        }
-
-        a {
-            -webkit-tap-highlight-color: transparent;
-        }
+        #product-image { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        .fabricks-link { position: absolute; left: 50%; transform: translateX(-50%); z-index: 20; top: 25%; }
+        .fabricks-link img { width: 300px; height: auto; border: none; }
     </style>
 </head>
 <body>
-
     <div class="scrolling-wrapper">
         <div id="viewer-container">
             <img id="product-image" src="image_01.jpg">
         </div>
-
-        <div class="fabricks-link pos-fabricks">
+        <div class="fabricks-link">
             <a href="https://fabricks.com/" target="_blank">
-                <img src="your-file-name.png" alt=""> </a>
+                <img src="your-file-name.png" alt="">
+            </a>
         </div>
     </div>
-
     <script>
         const imgElement = document.getElementById('product-image');
-        const totalFrames = 18;
         const images = [];
-
-        for (let i = 1; i <= totalFrames; i++) {
+        for (let i = 1; i <= 18; i++) {
             const num = i.toString().padStart(2, '0');
             images.push(`image_${num}.jpg`);
             new Image().src = `image_${num}.jpg`;
         }
-
-        let currentFrameIndex = 0; 
-        let lastFrameIndex = 0;
-        let isDragging = false;
-        let startX = 0;
-        let lastX = 0;
-        let velocity = 0; 
-        let rafId = null;
-
+        let currentFrameIndex = 0, lastFrameIndex = 0, isDragging = false, startX = 0, lastX = 0, velocity = 0, rafId = null;
         const updateFrame = (offset) => {
             let relativePos = offset + (lastFrameIndex <= 9 ? lastFrameIndex : lastFrameIndex - 18);
-            if (relativePos < -8) { relativePos = -8; velocity = 0; } 
+            if (relativePos < -8) { relativePos = -8; velocity = 0; }
             if (relativePos > 9) { relativePos = 9; velocity = 0; }
             let finalFrame = relativePos >= 0 ? relativePos : 18 + relativePos;
             if (finalFrame !== currentFrameIndex) {
@@ -114,50 +62,31 @@
                 currentFrameIndex = finalFrame;
             }
         };
-
         const animateInertia = () => {
             if (!isDragging) {
                 velocity *= 0.92;
                 if (Math.abs(velocity) > 0.1) {
-                    let nextRelative = (currentFrameIndex <= 9 ? currentFrameIndex : currentFrameIndex - 18) + (velocity / 15);
-                    if (nextRelative < -8) nextRelative = -8;
-                    if (nextRelative > 9) nextRelative = 9;
-                    let nextFrame = Math.round(nextRelative >= 0 ? nextRelative : 18 + nextRelative);
+                    let nextRel = (currentFrameIndex <= 9 ? currentFrameIndex : currentFrameIndex - 18) + (velocity / 15);
+                    if (nextRel < -8) nextRel = -8; if (nextRel > 9) nextRel = 9;
+                    let nextFrame = Math.round(nextRel >= 0 ? nextRel : 18 + nextRel);
                     if (nextFrame !== currentFrameIndex) {
                         imgElement.src = images[nextFrame];
                         currentFrameIndex = nextFrame;
                     }
                     rafId = requestAnimationFrame(animateInertia);
-                } else {
-                    lastFrameIndex = currentFrameIndex;
-                }
+                } else { lastFrameIndex = currentFrameIndex; }
             }
         };
-
-        const startAction = (x) => {
-            isDragging = true;
-            startX = x;
-            lastX = x;
-            lastFrameIndex = currentFrameIndex;
-            velocity = 0;
-            cancelAnimationFrame(rafId);
-        };
-
-        const moveAction = (x) => {
-            if (!isDragging) return;
-            velocity = x - lastX;
-            lastX = x;
-            const sensitivity = 15;
-            const frameOffset = Math.floor((x - startX) / sensitivity);
-            updateFrame(frameOffset);
-        };
-
+        const start = (x) => { isDragging = true; startX = x; lastX = x; lastFrameIndex = currentFrameIndex; velocity = 0; cancelAnimationFrame(rafId); };
+        const move = (x) => { if (!isDragging) return; velocity = x - lastX; lastX = x; updateFrame(Math.floor((x - startX) / 15)); };
+        const end = () => { if (!isDragging) return; isDragging = false; lastFrameIndex = currentFrameIndex; animateInertia(); };
         const container = document.getElementById('viewer-container');
-
-        // マウス
-        container.addEventListener('mousedown', (e) => startAction(e.pageX));
-        window.addEventListener('mousemove', (e) => { if (isDragging) moveAction(e.pageX); });
-        window.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                lastFrameIndex = currentFrameIndex
+        container.addEventListener('mousedown', (e) => start(e.pageX));
+        window.addEventListener('mousemove', (e) => move(e.pageX));
+        window.addEventListener('mouseup', end);
+        container.addEventListener('touchstart', (e) => start(e.touches[0].pageX), { passive: true });
+        container.addEventListener('touchmove', (e) => move(e.touches[0].pageX), { passive: true });
+        window.addEventListener('touchend', end);
+    </script>
+</body>
+</html>
