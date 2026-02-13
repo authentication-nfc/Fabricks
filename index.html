@@ -56,89 +56,115 @@
 
     <script>
         const imgElement = document.getElementById('product-image');
-        const totalFrames = 18;
-        const images = [];
+const totalFrames = 18;
+const images = [];
 
-        for (let i = 1; i <= totalFrames; i++) {
-            const num = i.toString().padStart(2, '0');
-            images.push(`image_${num}.jpg`);
-            new Image().src = `image_${num}.jpg`;
+for (let i = 1; i <= totalFrames; i++) {
+    const num = i.toString().padStart(2, '0');
+    images.push(`image_${num}.jpg`);
+    new Image().src = `image_${num}.jpg`;
+}
+
+let currentFrameIndex = 0; 
+let lastFrameIndex = 0;
+let isDragging = false;
+let isScrolling = false; // スクロール中かどうかのフラグ
+let startX = 0;
+let startY = 0; // タッチ開始時のY座標
+let velocity = 0; 
+let lastX = 0;
+let rafId = null;
+
+const updateFrame = (offset) => {
+    let relativePos = offset + (lastFrameIndex <= 9 ? lastFrameIndex : lastFrameIndex - 18);
+    if (relativePos < -8) { relativePos = -8; velocity = 0; } 
+    if (relativePos > 9) { relativePos = 9; velocity = 0; }
+    let finalFrame = relativePos >= 0 ? relativePos : 18 + relativePos;
+
+    if (finalFrame !== currentFrameIndex) {
+        imgElement.src = images[finalFrame];
+        currentFrameIndex = finalFrame;
+    }
+};
+
+const animateInertia = () => {
+    if (!isDragging) {
+        velocity *= 0.92;
+        if (Math.abs(velocity) > 0.1) {
+            let nextRelative = (currentFrameIndex <= 9 ? currentFrameIndex : currentFrameIndex - 18) + (velocity / 15);
+            if (nextRelative < -8) nextRelative = -8;
+            if (nextRelative > 9) nextRelative = 9;
+            let nextFrame = Math.round(nextRelative >= 0 ? nextRelative : 18 + nextRelative);
+            if (nextFrame !== currentFrameIndex) {
+                imgElement.src = images[nextFrame];
+                currentFrameIndex = nextFrame;
+            }
+            rafId = requestAnimationFrame(animateInertia);
+        } else {
+            lastFrameIndex = currentFrameIndex;
         }
+    }
+};
 
-        let currentFrameIndex = 0; 
-        let lastFrameIndex = 0;
-        let isDragging = false;
-        let startX = 0;
-        let velocity = 0; 
-        let lastX = 0;
-        let rafId = null;
+const startAction = (x, y) => {
+    isDragging = true;
+    isScrolling = false; // リセット
+    startX = x;
+    startY = y;
+    lastX = x;
+    lastFrameIndex = currentFrameIndex;
+    velocity = 0;
+    cancelAnimationFrame(rafId);
+};
 
-        const updateFrame = (offset) => {
-            let relativePos = offset + (lastFrameIndex <= 9 ? lastFrameIndex : lastFrameIndex - 18);
-            if (relativePos < -8) { relativePos = -8; velocity = 0; } 
-            if (relativePos > 9) { relativePos = 9; velocity = 0; }
-            let finalFrame = relativePos >= 0 ? relativePos : 18 + relativePos;
+const moveAction = (x, y, event) => {
+    if (!isDragging || isScrolling) return;
 
-            if (finalFrame !== currentFrameIndex) {
-                imgElement.src = images[finalFrame];
-                currentFrameIndex = finalFrame;
-            }
-        };
+    const diffX = Math.abs(x - startX);
+    const diffY = Math.abs(y - startY);
 
-        const animateInertia = () => {
-            if (!isDragging) {
-                velocity *= 0.92;
-                if (Math.abs(velocity) > 0.1) {
-                    let nextRelative = (currentFrameIndex <= 9 ? currentFrameIndex : currentFrameIndex - 18) + (velocity / 15);
-                    if (nextRelative < -8) nextRelative = -8;
-                    if (nextRelative > 9) nextRelative = 9;
-                    let nextFrame = Math.round(nextRelative >= 0 ? nextRelative : 18 + nextRelative);
-                    if (nextFrame !== currentFrameIndex) {
-                        imgElement.src = images[nextFrame];
-                        currentFrameIndex = nextFrame;
-                    }
-                    rafId = requestAnimationFrame(animateInertia);
-                } else {
-                    lastFrameIndex = currentFrameIndex;
-                }
-            }
-        };
+    // 最初に「上下の動き」が強いと判断したら、回転をキャンセルしてスクロールを優先する
+    if (!isScrolling && diffY > diffX && diffY > 10) {
+        isScrolling = true;
+        isDragging = false;
+        return;
+    }
 
-        const startAction = (x) => {
-            isDragging = true;
-            startX = x;
-            lastX = x;
-            lastFrameIndex = currentFrameIndex;
-            velocity = 0;
-            cancelAnimationFrame(rafId);
-        };
+    // 左右の動きが強ければ、ブラウザのスクロールを止めて画像を回転させる
+    if (diffX > 5) {
+        if (event.cancelable) event.preventDefault(); 
+        velocity = x - lastX;
+        lastX = x;
+        const sensitivity = 15;
+        const frameOffset = Math.floor((x - startX) / sensitivity);
+        updateFrame(frameOffset);
+    }
+};
 
-        const moveAction = (x) => {
-            if (!isDragging) return;
-            velocity = x - lastX;
-            lastX = x;
-            const sensitivity = 15;
-            const frameOffset = Math.floor((x - startX) / sensitivity);
-            updateFrame(frameOffset);
-        };
+const endAction = () => {
+    if (!isDragging) return;
+    isDragging = false;
+    lastFrameIndex = currentFrameIndex;
+    animateInertia();
+};
 
-        const endAction = () => {
-            if (!isDragging) return;
-            isDragging = false;
-            lastFrameIndex = currentFrameIndex;
-            animateInertia();
-        };
+const container = document.getElementById('viewer-container');
 
-        const container = document.getElementById('viewer-container');
-        container.addEventListener('mousedown', (e) => startAction(e.pageX));
-        window.addEventListener('mousemove', (e) => moveAction(e.pageX));
-        window.addEventListener('mouseup', endAction);
-        container.addEventListener('touchstart', (e) => startAction(e.touches[0].pageX));
-        container.addEventListener('touchmove', (e) => {
-            e.preventDefault(); 
-            moveAction(e.touches[0].pageX);
-        }, { passive: false });
-        window.addEventListener('touchend', endAction);
+// マウス操作
+container.addEventListener('mousedown', (e) => startAction(e.pageX, e.pageY));
+window.addEventListener('mousemove', (e) => moveAction(e.pageX, e.pageY, e));
+window.addEventListener('mouseup', endAction);
+
+// タッチ操作（スクロール対応版）
+container.addEventListener('touchstart', (e) => {
+    startAction(e.touches[0].pageX, e.touches[0].pageY);
+}, { passive: true });
+
+container.addEventListener('touchmove', (e) => {
+    moveAction(e.touches[0].pageX, e.touches[0].pageY, e);
+}, { passive: false });
+
+window.addEventListener('touchend', endAction);
     </script>
 </body>
 </html>
