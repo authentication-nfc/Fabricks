@@ -62,6 +62,18 @@
             color: transparent;
             -webkit-text-stroke: 1.5px #ffffff;
             opacity: 0.8;
+            
+            /* 追加：重ねる画像のデザイン */
+        .overlay-image-layer {
+            position: absolute;
+            top: 50px;         /* 上からの位置（数字と被らないように調整） */
+            right: 50px;       /* 右からの位置 */
+            width: 150px;      /* 画像の横幅（お好みで調整） */
+            height: auto;
+            z-index: 100;      /* 一番手前に配置 */
+            pointer-events: none; /* 下の画像のドラッグを邪魔しない */
+            opacity: 0.8;      /* 少し透けさせる（不要なら削除） */
+        }
         }/* 余白をリセットするコマンド */
 * {
     margin: 0;
@@ -96,6 +108,7 @@ body {
         <div id="viewer-container">
             <img id="product-image" src="image_01.jpg">
             <div class="overlay-number">7</div>
+            <img src="your-logo.png" class="overlay-image-layer">
         </div>
         <div class="fabricks-link">
             <a href="https://fabricks.com/" target="_blank">
