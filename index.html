@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Fabricks Style - Final</title>
+    <title>Fabricks Style - Fix</title>
     <style>
         body, html { 
             margin: 0; 
@@ -27,7 +27,7 @@
         /* 2. 360度ビューアの設定 */
         #viewer-container {
             position: absolute;
-            top: 17%; /* ★ご要望通り 17% に変更しました */
+            top: 17%; /* 回転画像の位置を17%に設定 */
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%; 
@@ -56,7 +56,7 @@
         }
 
         .fabricks-link img {
-            width: 300px;  /* ★ボタンの大きさ */
+            width: 300px; 
             height: auto;
             border: none;
             outline: none;
@@ -64,8 +64,7 @@
         }
 
         .pos-fabricks {
-            /* 回転画像(17%)のすぐ下に置く場合は、25%〜30%くらいが目安です */
-            top: 25%; 
+            top: 25%; /* ボタンの位置（回転画像の下付近） */
         }
 
         a {
@@ -153,4 +152,12 @@
             updateFrame(frameOffset);
         };
 
-        const container =
+        const container = document.getElementById('viewer-container');
+
+        // マウス
+        container.addEventListener('mousedown', (e) => startAction(e.pageX));
+        window.addEventListener('mousemove', (e) => { if (isDragging) moveAction(e.pageX); });
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                lastFrameIndex = currentFrameIndex
