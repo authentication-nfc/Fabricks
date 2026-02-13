@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Fabricks Style - 360 Viewer</title>
     <style>
+        /* リンク画像の共通設定 */
+.link-image-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20; /* 回転画像(10)より手前に出す */
+}
+
+.link-image-container img {
+    width: 250px; /* ★ボタン画像のサイズ（お好みで変えてください） */
+    height: auto;
+    cursor: pointer;
+}
+
+/* 配置場所の高さ指定 */
+.pos-link-bottom {
+    top: 85%; /* ★背景の上から85%の位置（場所を変えたいときはここを調整） */
+}
         body, html { 
             margin: 0; 
             padding: 0; 
@@ -51,6 +69,9 @@
 
     <div class="scrolling-wrapper">
         <div id="viewer-container">
+            <div class="link-image-container pos-link-bottom">
+    <a href="https://www.google.com" target="_blank"> <img src="button.png" alt="リンクボタン"> </a>
+</div>
             <img id="product-image" src="image_01.jpg">
         </div>
     </div>
