@@ -25,11 +25,16 @@
             width: 100%;
             max-width: 1500px;
             margin: 0 auto;
-            /* 元の比率を維持：これで画像がある分だけスクロールできます */
+            
+            /* ★ここを修正：比率を計算させて余白を消す */
+            /* 画像の高さ(11000) ÷ 画像の幅(1500) × 100 = 733.33 */
+            /* もしこれでも余白があるなら、730vw など少しずつ数字を減らしてください */
             height: 733.33vw; 
+            
             background: url('long-background.jpg') no-repeat top center;
             background-size: 100% auto;
-            /* ★ここがポイント：これより下の余白をカットします */
+            
+            /* ★はみ出た分を強制カット */
             overflow: hidden; 
         }
 
