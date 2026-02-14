@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Fixed Viewer</title>
     <style>
-        /* 1. フォント読み込み（最優先） */
+        /* 1. フォント読み込み */
         @font-face {
             font-family: 'Archia-Regular';
             src: url('Archia-Regular.BsKxFEMw.otf') format('opentype');
@@ -16,30 +16,27 @@
         /* 2. 基本リセット */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* 全体のスクロールを禁止して背景画像内だけに収める */
-        body, html { 
-            width: 100%; 
-            height: 100%; 
-            background-color: #000; 
-            overflow: hidden; /* 画面外の余白をカット */
-            line-height: 0; 
-        }
+        /* htmlの背景を黒に、bodyは画像がある分だけ */
+        html { background-color: #000; }
+        body { width: 100%; margin: 0; padding: 0; line-height: 0; }
 
         .scrolling-wrapper {
             position: relative;
             width: 100%;
             max-width: 1500px;
             margin: 0 auto;
-            /* 背景画像が1枚で見えるように高さを画面いっぱいに固定 */
-            height: 100vh; 
+            /* 元の比率を維持：これで画像がある分だけスクロールできます */
+            height: 733.33vw; 
             background: url('long-background.jpg') no-repeat top center;
-            background-size: cover; /* 背景を隙間なく埋める */
+            background-size: 100% auto;
+            /* ★ここがポイント：これより下の余白をカットします */
+            overflow: hidden; 
         }
 
         /* 3. ビューアー本体 */
         #viewer-container {
             position: absolute;
-            top: 50%; /* 画面中央付近に配置 */
+            top: 19%; /* 元の位置に戻しました */
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
@@ -55,12 +52,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: rgba(148, 246, 252, 0.2); /* 透明度を調整 */
+            background-color: rgb(148, 246, 252); 
         }
 
         #product-image { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
 
-        /* 4. 重ねる数字（Archiaフォント適用） */
+        /* 4. 重ねる数字（Archiaフォント） */
         .overlay-number {
             position: absolute;
             top: 5%;
@@ -75,12 +72,12 @@
             opacity: 0.8;
         }
 
-        /* 5. 重ねる画像（右下付近） */
+        /* 5. 重ねる画像 */
         .overlay-image-layer {
             position: absolute;
-            bottom: 5%; /* topからbottomに変更して確実に表示 */
-            right: 5%;
-            width: 100px;
+            top: 86%;
+            right: -6%;
+            width: 120px;
             height: auto;
             z-index: 100;
             pointer-events: none;
@@ -90,10 +87,10 @@
         /* 6. リンクボタン */
         .fabricks-link { 
             position: absolute; 
-            left: 50%; 
+            left: 42%; 
             transform: translateX(-50%); 
             z-index: 20; 
-            top: 2%; 
+            top: -0.25%; 
         }
         .fabricks-link img { width: 160px; height: auto; border: none; }
     </style>
@@ -138,29 +135,4 @@
             if (!isDragging) {
                 velocity *= 0.92;
                 if (Math.abs(velocity) > 0.1) {
-                    let nextRel = (currentFrameIndex <= 9 ? currentFrameIndex : currentFrameIndex - 18) + (velocity / 15);
-                    if (nextRel < -8) nextRel = -8; if (nextRel > 9) nextRel = 9;
-                    let nextFrame = Math.round(nextRel >= 0 ? nextRel : 18 + nextRel);
-                    if (nextFrame !== currentFrameIndex) {
-                        imgElement.src = images[nextFrame];
-                        currentFrameIndex = nextFrame;
-                    }
-                    rafId = requestAnimationFrame(animateInertia);
-                } else { lastFrameIndex = currentFrameIndex; }
-            }
-        };
-
-        const start = (x) => { isDragging = true; startX = x; lastX = x; lastFrameIndex = currentFrameIndex; velocity = 0; cancelAnimationFrame(rafId); };
-        const move = (x) => { if (!isDragging) return; velocity = x - lastX; lastX = x; updateFrame(Math.floor((x - startX) / 15)); };
-        const end = () => { if (!isDragging) return; isDragging = false; lastFrameIndex = currentFrameIndex; animateInertia(); };
-        
-        const container = document.getElementById('viewer-container');
-        container.addEventListener('mousedown', (e) => start(e.pageX));
-        window.addEventListener('mousemove', (e) => move(e.pageX));
-        window.addEventListener('mouseup', end);
-        container.addEventListener('touchstart', (e) => start(e.touches[0].pageX), { passive: true });
-        container.addEventListener('touchmove', (e) => move(e.touches[0].pageX), { passive: true });
-        window.addEventListener('touchend', end);
-    </script>
-</body>
-</html>
+                    let nextRel = (currentFrameIndex <= 9 ? currentFrameIndex : currentFrameIndex - 18) + (velocity /
