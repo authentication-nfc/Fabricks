@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Fixed Viewer</title>
     <style>
-        /* 1. フォント読み込み */
+        /* 1. フォント読み込み設定 */
         @font-face {
             font-family: 'Archia-Regular';
             src: url('Archia-Regular.BsKxFEMw.otf') format('opentype');
@@ -13,60 +13,57 @@
             font-style: normal;
         }
 
-        /* 2. 基本リセット */
+        /* 基本リセット */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { background-color: #000; }
-        body { width: 100%; margin: 0; padding: 0; line-height: 0; }
+        body, html { width: 100%; background-color: #000; overflow-x: hidden; }
 
         .scrolling-wrapper {
             position: relative;
             width: 100%;
             max-width: 1500px;
             margin: 0 auto;
+            /* 元の比率を維持 */
             height: 733.33vw; 
             background: url('long-background.jpg') no-repeat top center;
             background-size: 100% auto;
+            /* ★画像の下の余白をカット */
             overflow: hidden; 
         }
 
-        /* 3. ビューアー本体（回転判定を復活） */
         #viewer-container {
             position: absolute;
-            top: 19%; 
+            top: 19%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 2000px;
-            /* 高さを確保しないと反応しないため aspect-ratio を設定 */
-            aspect-ratio: 1 / 1; 
+            /* 比率を崩さないよう、高さは指定しないか元のままにする */
+            height: auto;
+            max-height: 80vh;
             touch-action: pan-y;
             cursor: ew-resize;
             z-index: 10;
             border: 2px solid #94F6FC;
             border-radius: 20px;
             overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: block; /* flexから元のblockに戻して比率崩れを防止 */
             background-color: rgb(148, 246, 252); 
-            /* ★重要：ここは pointer-events を設定しない（マウスを受け取る） */
         }
 
-        /* 中の画像はイベントをスルーさせてコンテナで拾う */
         #product-image { 
             width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
+            height: auto; /* autoに戻して元の縦横比を強制維持 */
+            display: block;
             pointer-events: none; 
         }
 
-        /* 4. 数字（Archiaフォント） */
+        /* 数字のデザイン（Archiaフォント適用） */
         .overlay-number {
             position: absolute;
             top: 5%;
             left: 5%;
             z-index: 100;
-            pointer-events: none; /* 下の回転を邪魔しない */
+            pointer-events: none;
             font-family: 'Archia-Regular', sans-serif;
             font-size: 80px;
             line-height: 1;
@@ -75,26 +72,19 @@
             opacity: 0.8;
         }
 
-        /* 5. オーバーレイ画像 */
+        /* 重ねる画像のデザイン */
         .overlay-image-layer {
             position: absolute;
             top: 86%;
             right: -6%;
-            width: 120px;       
+            width: 120px;
             height: auto;
             z-index: 100;
-            pointer-events: none; /* 下の回転を邪魔しない */
+            pointer-events: none;
             opacity: 0.8;
         }
 
-        /* 6. リンクボタン */
-        .fabricks-link { 
-            position: absolute; 
-            left: 42%; 
-            transform: translateX(-50%); 
-            z-index: 20; 
-            top: -0.25%; 
-        }
+        .fabricks-link { position: absolute; left: 42%; transform: translateX(-50%); z-index: 20; top: -0.25%; }
         .fabricks-link img { width: 160px; height: auto; border: none; }
     </style>
 </head>
@@ -105,14 +95,12 @@
             <div class="overlay-number">7</div>
             <img src="your-logo.png" class="overlay-image-layer">
         </div>
-
         <div class="fabricks-link">
             <a href="https://fabricks.com/" target="_blank">
                 <img src="button.png" alt="">
             </a>
         </div>
     </div>
-
     <script>
         const imgElement = document.getElementById('product-image');
         const images = [];
@@ -122,7 +110,6 @@
             new Image().src = `image_${num}.jpg`;
         }
         let currentFrameIndex = 0, lastFrameIndex = 0, isDragging = false, startX = 0, lastX = 0, velocity = 0, rafId = null;
-        
         const updateFrame = (offset) => {
             let relativePos = offset + (lastFrameIndex <= 9 ? lastFrameIndex : lastFrameIndex - 18);
             if (relativePos < -8) { relativePos = -8; velocity = 0; }
@@ -133,7 +120,6 @@
                 currentFrameIndex = finalFrame;
             }
         };
-
         const animateInertia = () => {
             if (!isDragging) {
                 velocity *= 0.92;
@@ -149,11 +135,9 @@
                 } else { lastFrameIndex = currentFrameIndex; }
             }
         };
-
         const start = (x) => { isDragging = true; startX = x; lastX = x; lastFrameIndex = currentFrameIndex; velocity = 0; cancelAnimationFrame(rafId); };
         const move = (x) => { if (!isDragging) return; velocity = x - lastX; lastX = x; updateFrame(Math.floor((x - startX) / 15)); };
         const end = () => { if (!isDragging) return; isDragging = false; lastFrameIndex = currentFrameIndex; animateInertia(); };
-        
         const container = document.getElementById('viewer-container');
         container.addEventListener('mousedown', (e) => start(e.pageX));
         window.addEventListener('mousemove', (e) => move(e.pageX));
