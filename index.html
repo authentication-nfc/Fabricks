@@ -5,31 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Fixed Viewer</title>
     <style>
-        /* 1. フォント読み込み設定 */
         @font-face {
             font-family: 'Archia-Regular';
             src: url('Archia-Regular.BsKxFEMw.otf') format('opentype');
             font-weight: normal;
             font-style: normal;
         }
-
-        /* 基本リセット */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body, html { width: 100%; background-color: #000; overflow-x: hidden; }
-
         .scrolling-wrapper {
             position: relative;
             width: 100%;
             max-width: 1500px;
             margin: 0 auto;
-            /* 元の比率を維持 */
             height: 733.33vw; 
             background: url('long-background.jpg') no-repeat top center;
             background-size: 100% auto;
-            /* ★画像の下の余白をカット */
             overflow: hidden; 
         }
-
         #viewer-container {
             position: absolute;
             top: 19%;
@@ -37,7 +30,6 @@
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 2000px;
-            /* 比率を崩さないよう、高さは指定しないか元のままにする */
             height: auto;
             max-height: 80vh;
             touch-action: pan-y;
@@ -46,18 +38,15 @@
             border: 2px solid #94F6FC;
             border-radius: 20px;
             overflow: hidden;
-            display: block; /* flexから元のblockに戻して比率崩れを防止 */
+            display: block;
             background-color: rgb(148, 246, 252); 
         }
-
         #product-image { 
             width: 100%; 
-            height: auto; /* autoに戻して元の縦横比を強制維持 */
+            height: auto;
             display: block;
             pointer-events: none; 
         }
-
-        /* 数字のデザイン（Archiaフォント適用） */
         .overlay-number {
             position: absolute;
             top: 5%;
@@ -71,8 +60,6 @@
             -webkit-text-stroke: 2px #ffffff;
             opacity: 0.8;
         }
-
-        /* 重ねる画像のデザイン */
         .overlay-image-layer {
             position: absolute;
             top: 86%;
@@ -83,7 +70,6 @@
             pointer-events: none;
             opacity: 0.8;
         }
-
         .fabricks-link { position: absolute; left: 42%; transform: translateX(-50%); z-index: 20; top: -0.25%; }
         .fabricks-link img { width: 160px; height: auto; border: none; }
     </style>
@@ -92,7 +78,7 @@
     <div class="scrolling-wrapper">
         <div id="viewer-container">
             <img id="product-image" src="image_01.jpg">
-            <div class="overlay-number">7</div>
+            <div class="overlay-number">8</div>
             <img src="your-logo.png" class="overlay-image-layer">
         </div>
         <div class="fabricks-link">
@@ -103,34 +89,40 @@
     </div>
     <script>
         const imgElement = document.getElementById('product-image');
-        // 画像を2枚だけに設定
         const images = ['image_01.jpg', 'image_02.jpg'];
         images.forEach(src => { new Image().src = src; });
 
         let currentFrameIndex = 0;
         let isDragging = false;
         let startX = 0;
+        let hasSwitched = false; // 1回のドラッグで何度も切り替わらないためのフラグ
 
         const updateFrame = (deltaX) => {
-            // 30px動かしたら切り替える
-            const threshold = 30;
-            let nextIndex = currentFrameIndex;
-
-            if (deltaX > threshold) {
-                nextIndex = 1;
-            } else if (deltaX < -threshold) {
-                nextIndex = 0;
-            }
-
-            if (nextIndex !== currentFrameIndex) {
-                imgElement.src = images[nextIndex];
-                currentFrameIndex = nextIndex;
+            const threshold = 50; // 50px動いたら切り替える
+            
+            // 絶対値（動きの大きさ）がしきい値を超えたかチェック
+            if (Math.abs(deltaX) > threshold && !hasSwitched) {
+                // 現在が0なら1に、1なら0に入れ替える
+                currentFrameIndex = currentFrameIndex === 0 ? 1 : 0;
+                imgElement.src = images[currentFrameIndex];
+                hasSwitched = true; // 指を離すまで次の切り替えをブロック
             }
         };
 
-        const start = (x) => { isDragging = true; startX = x; };
-        const move = (x) => { if (!isDragging) return; updateFrame(x - startX); };
-        const end = () => { isDragging = false; };
+        const start = (x) => { 
+            isDragging = true; 
+            startX = x; 
+            hasSwitched = false; // ドラッグ開始時にフラグをリセット
+        };
+        
+        const move = (x) => { 
+            if (!isDragging) return; 
+            updateFrame(x - startX); 
+        };
+        
+        const end = () => { 
+            isDragging = false; 
+        };
 
         const container = document.getElementById('viewer-container');
         container.addEventListener('mousedown', (e) => start(e.pageX));
