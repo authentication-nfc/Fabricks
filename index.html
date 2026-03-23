@@ -103,41 +103,35 @@
     </div>
     <script>
         const imgElement = document.getElementById('product-image');
-        const images = [];
-        for (let i = 1; i <= 18; i++) {
-            const num = i.toString().padStart(2, '0');
-            images.push(`image_${num}.jpg`);
-            new Image().src = `image_${num}.jpg`;
-        }
-        let currentFrameIndex = 0, lastFrameIndex = 0, isDragging = false, startX = 0, lastX = 0, velocity = 0, rafId = null;
-        const updateFrame = (offset) => {
-            let relativePos = offset + (lastFrameIndex <= 9 ? lastFrameIndex : lastFrameIndex - 18);
-            if (relativePos < -8) { relativePos = -8; velocity = 0; }
-            if (relativePos > 9) { relativePos = 9; velocity = 0; }
-            let finalFrame = relativePos >= 0 ? relativePos : 18 + relativePos;
-            if (finalFrame !== currentFrameIndex) {
-                imgElement.src = images[finalFrame];
-                currentFrameIndex = finalFrame;
+        // 画像を2枚だけに設定
+        const images = ['image_01.jpg', 'image_02.jpg'];
+        images.forEach(src => { new Image().src = src; });
+
+        let currentFrameIndex = 0;
+        let isDragging = false;
+        let startX = 0;
+
+        const updateFrame = (deltaX) => {
+            // 30px動かしたら切り替える
+            const threshold = 30;
+            let nextIndex = currentFrameIndex;
+
+            if (deltaX > threshold) {
+                nextIndex = 1;
+            } else if (deltaX < -threshold) {
+                nextIndex = 0;
+            }
+
+            if (nextIndex !== currentFrameIndex) {
+                imgElement.src = images[nextIndex];
+                currentFrameIndex = nextIndex;
             }
         };
-        const animateInertia = () => {
-            if (!isDragging) {
-                velocity *= 0.92;
-                if (Math.abs(velocity) > 0.1) {
-                    let nextRel = (currentFrameIndex <= 9 ? currentFrameIndex : currentFrameIndex - 18) + (velocity / 15);
-                    if (nextRel < -8) nextRel = -8; if (nextRel > 9) nextRel = 9;
-                    let nextFrame = Math.round(nextRel >= 0 ? nextRel : 18 + nextRel);
-                    if (nextFrame !== currentFrameIndex) {
-                        imgElement.src = images[nextFrame];
-                        currentFrameIndex = nextFrame;
-                    }
-                    rafId = requestAnimationFrame(animateInertia);
-                } else { lastFrameIndex = currentFrameIndex; }
-            }
-        };
-        const start = (x) => { isDragging = true; startX = x; lastX = x; lastFrameIndex = currentFrameIndex; velocity = 0; cancelAnimationFrame(rafId); };
-        const move = (x) => { if (!isDragging) return; velocity = x - lastX; lastX = x; updateFrame(Math.floor((x - startX) / 15)); };
-        const end = () => { if (!isDragging) return; isDragging = false; lastFrameIndex = currentFrameIndex; animateInertia(); };
+
+        const start = (x) => { isDragging = true; startX = x; };
+        const move = (x) => { if (!isDragging) return; updateFrame(x - startX); };
+        const end = () => { isDragging = false; };
+
         const container = document.getElementById('viewer-container');
         container.addEventListener('mousedown', (e) => start(e.pageX));
         window.addEventListener('mousemove', (e) => move(e.pageX));
